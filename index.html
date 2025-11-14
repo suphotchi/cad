@@ -50,6 +50,10 @@
       background-color: #e01b24;
       border-color: #e01b24;
     }
+    .btn-success {
+      background-color: #28a745;
+      border-color: #28a745;
+    }
     .position-row {
       margin-bottom: 15px;
       padding: 15px;
@@ -105,6 +109,92 @@
       font-size: 0.9em;
       color: #555;
     }
+    .retirement-info {
+      margin-top: 5px;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .committee-note {
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    /* สไตล์สำหรับการพิมพ์ */
+    @media print {
+      body {
+        background-color: white !important;
+        font-size: 12pt;
+      }
+      .container {
+        width: 100%;
+        max-width: none;
+      }
+      .header {
+        background-color: #1a5fb4 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+      }
+      .form-container {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+      }
+      .btn {
+        display: none !important;
+      }
+      .progress {
+        display: none !important;
+      }
+      .footer {
+        border-top: 1px solid #ddd;
+        margin-top: 20px;
+      }
+      .committee-section {
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+      }
+      .result-box {
+        border-left: 4px solid #1a5fb4 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+      }
+      .position-row {
+        background-color: #f1f8ff !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+    
+    .print-only {
+      display: none;
+    }
+    
+    .print-header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #1a5fb4;
+      padding-bottom: 10px;
+    }
+    
+    .print-footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.8em;
+      color: #666;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -141,18 +231,19 @@
       
       <div class="row mb-3">
         <div class="col-md-4">
-          <label for="birthDate" class="form-label">วันเดือนปีเกิด</label>
+          <label for="birthDate" class="form-label">วันเดือนปีเกิด (พ.ศ.)</label>
           <input type="date" class="form-control" id="birthDate">
           <div class="birth-date-display" id="birthDateDisplay">-</div>
           <div class="current-age" id="currentAge">-</div>
         </div>
         <div class="col-md-4">
-          <label for="startDate" class="form-label">วันเดือนปีบรรจุรับราชการ</label>
+          <label for="startDate" class="form-label">วันเดือนปีบรรจุรับราชการ (พ.ศ.)</label>
           <input type="date" class="form-control" id="startDate">
         </div>
         <div class="col-md-4">
-          <label for="retirementDate" class="form-label">วันเกษียณอายุราชการ</label>
+          <label for="retirementDate" class="form-label">วันเกษียณอายุราชการ (พ.ศ.)</label>
           <input type="text" class="form-control" id="retirementDate" readonly>
+          <div class="retirement-info" id="retirementInfo">-</div>
         </div>
       </div>
     </div>
@@ -162,7 +253,7 @@
       <div id="positionHistory">
         <!-- Position rows will be added here -->
       </div>
-      <button type="button" class="btn btn-secondary mt-2" id="addPositionBtn">
+      <button type="button" class="btn btn-secondary mt-2 no-print" id="addPositionBtn">
         <i class="fas fa-plus"></i> เพิ่มตำแหน่ง
       </button>
     </div>
@@ -193,6 +284,7 @@
           <p>ครั้งที่ 3: <span class="thai-date" id="mentor3">-</span></p>
           <p>ครั้งที่ 4: <span class="thai-date" id="mentor4">-</span></p>
         </div>
+        <div class="committee-note" id="mentorNote">-</div>
       </div>
       
       <!-- คณะกรรมการประเมิน (2 ครั้ง ครั้งละ 6 เดือน) -->
@@ -202,24 +294,32 @@
           <p>ครั้งที่ 1: <span class="thai-date" id="eval1">-</span></p>
           <p>ครั้งที่ 2: <span class="thai-date" id="eval2">-</span></p>
         </div>
+        <div class="committee-note" id="evalNote">-</div>
       </div>
       
-      <div class="progress mt-3" id="progressBar" style="display: none;">
+      <div class="progress mt-3 no-print" id="progressBar" style="display: none;">
         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
       </div>
-      <div id="progressText" class="text-center mb-3" style="display: none;">กำลังคำนวณ...</div>
+      <div id="progressText" class="text-center mb-3 no-print" style="display: none;">กำลังคำนวณ...</div>
       
-      <div class="d-flex justify-content-between mt-4">
-        <button type="button" class="btn btn-danger" onclick="clearForm()">
-          <i class="fas fa-trash-alt"></i> ล้างข้อมูล
-        </button>
-        <button type="button" class="btn btn-primary" onclick="calculateAll()">
-          <i class="fas fa-calculator"></i> คำนวณทั้งหมด
-        </button>
+      <div class="d-flex justify-content-between mt-4 no-print">
+        <div>
+          <button type="button" class="btn btn-danger" onclick="clearForm()">
+            <i class="fas fa-trash-alt"></i> ล้างข้อมูล
+          </button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-success me-2" onclick="printReport()">
+            <i class="fas fa-print"></i> พิมพ์รายงาน
+          </button>
+          <button type="button" class="btn btn-primary" onclick="calculateAll()">
+            <i class="fas fa-calculator"></i> คำนวณทั้งหมด
+          </button>
+        </div>
       </div>
     </div>
     
-    <div class="footer">
+    <div class="footer no-print">
       <img src="https://raw.githubusercontent.com/suphot1973/Data/refs/heads/main/images/sesapylogo.png" alt="Logo" class="logo" style="max-width: 80px;">
       <p>© 2025 โปรแกรมคำนวณระยะเวลาการประเมินข้าราชการ - สงวนลิขสิทธิ์</p>
       <p>พัฒนาโดย จ่าสิบโท สุพจน์ ชัยชนะ </p>
@@ -301,9 +401,12 @@
               '<li>กรอกข้อมูลส่วนตัวและประวัติการดำรงตำแหน่ง</li>' +
               '<li>กดปุ่ม "คำนวณทั้งหมด" เพื่อดูผลลัพธ์</li>' +
               '<li>สามารถเพิ่มตำแหน่งได้โดยกดปุ่ม "เพิ่มตำแหน่ง"</li>' +
+              '<li>กดปุ่ม "พิมพ์รายงาน" เพื่อพิมพ์ข้อมูลทั้งหมด</li>' +
               '<li>กดปุ่ม "ล้างข้อมูล" เพื่อเริ่มต้นใหม่</li>' +
               '</ol>' +
-              '<p>โปรแกรมนี้จะคำนวณวันที่ประเมินโดยไม่ตรงกับวันหยุดราชการ หากตรงจะขยับไปวันทำการถัดไป</p></div>',
+              '<p>โปรแกรมนี้จะคำนวณวันที่ประเมินโดยไม่ตรงกับวันหยุดราชการ หากตรงจะขยับไปวันทำการถัดไป</p>' +
+              '<p><b>หมายเหตุ:</b> วันเกษียณอายุราชการจะกำหนดเป็นวันที่ 30 กันยายน ของปีที่ครบอายุ 60 ปี</p>' +
+              '<p><b>หมายเหตุ:</b> การคำนวณวันที่ประเมินจะนับจากตำแหน่งล่าสุดที่บันทึก</p></div>',
         icon: 'info',
         confirmButtonText: 'เข้าใจแล้ว',
         width: '800px'
@@ -345,11 +448,11 @@
             <input type="text" class="form-control" id="positionTitle${rowCount}" placeholder="กรุณากรอกตำแหน่ง">
           </div>
           <div class="col-md-4">
-            <label for="positionDate${rowCount}" class="form-label">วันที่ดำรงตำแหน่ง</label>
+            <label for="positionDate${rowCount}" class="form-label">วันที่ดำรงตำแหน่ง (พ.ศ.)</label>
             <input type="date" class="form-control position-date" id="positionDate${rowCount}">
           </div>
           <div class="col-md-2 d-flex align-items-end">
-            ${rowCount > 0 ? `<button type="button" class="btn btn-sm btn-danger" onclick="removePositionRow(this)"><i class="fas fa-trash"></i></button>` : ''}
+            ${rowCount > 0 ? `<button type="button" class="btn btn-sm btn-danger no-print" onclick="removePositionRow(this)"><i class="fas fa-trash"></i></button>` : ''}
           </div>
         </div>
         <div class="row mt-2">
@@ -390,24 +493,41 @@
       calculateCurrentPositionDuration();
     }
     
-    // Calculate retirement date (60 years from birth date)
+    // Calculate retirement date (60 years from birth date) - กำหนดเกษียณวันที่ 30 กันยายน
     function calculateRetirement() {
       const birthDateInput = document.getElementById('birthDate');
       const birthDate = birthDateInput.value;
       
       if (!birthDate) {
         document.getElementById('retirementDate').value = '';
+        document.getElementById('retirementInfo').textContent = '-';
         return;
       }
       
       try {
         const birthMoment = moment(birthDate, 'YYYY-MM-DD');
-        const retirementMoment = birthMoment.clone().add(60, 'years');
+        const retirementYear = birthMoment.year() + 60;
+        
+        // สร้างวันที่เกษียณเป็น 30 กันยายน ของปีที่ครบอายุ 60 ปี
+        let retirementMoment = moment(`${retirementYear}-09-30`, 'YYYY-MM-DD');
+        
+        // ตรวจสอบว่าวันที่เกษียณเป็นวันหยุดหรือไม่ ถ้าใช่ให้ใช้วันทำงานถัดไป
+        retirementMoment = moment(getNextWorkDay(retirementMoment.toDate()));
         
         document.getElementById('retirementDate').value = formatThaiDate(retirementMoment.toDate());
+        
+        // แสดงข้อมูลเพิ่มเติมเกี่ยวกับการเกษียณ
+        const yearsToRetirement = retirementMoment.diff(moment(), 'years');
+        const monthsToRetirement = retirementMoment.diff(moment(), 'months') % 12;
+        
+        document.getElementById('retirementInfo').innerHTML = `
+          <strong>เหลือเวลาอีก:</strong> ${yearsToRetirement} ปี ${monthsToRetirement} เดือน<br>
+          <small>เกษียณอายุเมื่อครบ 60 ปี ในวันที่ 30 กันยายน ${retirementYear + 543}</small>
+        `;
       } catch (e) {
         console.error('Error calculating retirement date:', e);
         document.getElementById('retirementDate').value = 'เกิดข้อผิดพลาด';
+        document.getElementById('retirementInfo').textContent = '-';
       }
     }
     
@@ -512,10 +632,25 @@
       }
     }
     
-    // Calculate committee dates
+    // Calculate committee dates - คำนวณจากตำแหน่งล่าสุด
     function calculateCommitteeDates() {
-      const startDate = document.getElementById('startDate').value;
-      if (!startDate) {
+      const positionDates = document.getElementsByClassName('position-date');
+      
+      // หาตำแหน่งล่าสุด
+      let lastPositionDate = null;
+      for (let i = positionDates.length - 1; i >= 0; i--) {
+        if (positionDates[i].value) {
+          lastPositionDate = positionDates[i].value;
+          break;
+        }
+      }
+      
+      // ถ้าไม่มีตำแหน่งล่าสุด ให้ใช้วันที่เริ่มรับราชการ
+      if (!lastPositionDate) {
+        lastPositionDate = document.getElementById('startDate').value;
+      }
+      
+      if (!lastPositionDate) {
         // Clear all committee dates
         for (let i = 1; i <= 4; i++) {
           document.getElementById(`mentor${i}`).innerHTML = '-';
@@ -525,27 +660,38 @@
           document.getElementById(`eval${i}`).innerHTML = '-';
           document.getElementById(`eval${i}`).classList.remove('holiday');
         }
+        document.getElementById('mentorNote').textContent = 'กรุณากรอกวันที่ดำรงตำแหน่งล่าสุด';
+        document.getElementById('evalNote').textContent = 'กรุณากรอกวันที่ดำรงตำแหน่งล่าสุด';
         return;
       }
       
       try {
-        const startMoment = moment(startDate);
+        const lastPositionMoment = moment(lastPositionDate);
         
         // คณะกรรมการพี่เลี้ยง (4 ครั้ง ครั้งละ 3 เดือน)
         for (let i = 1; i <= 4; i++) {
-          const mentorDate = getNextWorkDay(startMoment.clone().add(i * 3, 'months').toDate());
+          const mentorDate = getNextWorkDay(lastPositionMoment.clone().add(i * 3, 'months').toDate());
           document.getElementById(`mentor${i}`).innerHTML = formatThaiDateFull(mentorDate);
           document.getElementById(`mentor${i}`).classList.remove('holiday');
         }
         
         // คณะกรรมการประเมิน (2 ครั้ง ครั้งละ 6 เดือน)
         for (let i = 1; i <= 2; i++) {
-          const evalDate = getNextWorkDay(startMoment.clone().add(i * 6, 'months').toDate());
+          const evalDate = getNextWorkDay(lastPositionMoment.clone().add(i * 6, 'months').toDate());
           document.getElementById(`eval${i}`).innerHTML = formatThaiDateFull(evalDate);
           document.getElementById(`eval${i}`).classList.remove('holiday');
         }
+        
+        // แสดงหมายเหตุ
+        document.getElementById('mentorNote').innerHTML = 
+          `<strong>หมายเหตุ:</strong> คำนวณจากวันที่ดำรงตำแหน่งล่าสุด (${formatThaiDate(lastPositionMoment.toDate())})`;
+        document.getElementById('evalNote').innerHTML = 
+          `<strong>หมายเหตุ:</strong> คำนวณจากวันที่ดำรงตำแหน่งล่าสุด (${formatThaiDate(lastPositionMoment.toDate())})`;
+          
       } catch (e) {
         console.error('Error calculating committee dates:', e);
+        document.getElementById('mentorNote').textContent = 'เกิดข้อผิดพลาดในการคำนวณ';
+        document.getElementById('evalNote').textContent = 'เกิดข้อผิดพลาดในการคำนวณ';
       }
     }
     
@@ -612,6 +758,7 @@
           document.getElementById('currentPositionDuration').innerHTML = '-';
           document.getElementById('birthDateDisplay').textContent = '-';
           document.getElementById('currentAge').textContent = '-';
+          document.getElementById('retirementInfo').textContent = '-';
           
           // Clear committee results
           for (let i = 1; i <= 4; i++) {
@@ -622,13 +769,28 @@
             document.getElementById(`eval${i}`).innerHTML = '-';
             document.getElementById(`eval${i}`).classList.remove('holiday');
           }
+          document.getElementById('mentorNote').textContent = '-';
+          document.getElementById('evalNote').textContent = '-';
           
           Swal.fire('ล้างข้อมูลแล้ว', 'ข้อมูลทั้งหมดถูกล้างเรียบร้อย', 'success');
         }
       });
     }
     
-    // Format date to Thai date (short)
+    // Print report
+    function printReport() {
+      // ตรวจสอบว่ามีข้อมูลหรือไม่
+      const fullName = document.getElementById('fullName').value;
+      if (!fullName) {
+        Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลส่วนตัวก่อนพิมพ์รายงาน', 'warning');
+        return;
+      }
+      
+      // แสดงหน้าต่างพิมพ์
+      window.print();
+    }
+    
+    // Format date to Thai date (short) - แสดงปีเป็นพุทธศักราช
     function formatThaiDate(date) {
       if (!date || isNaN(date.getTime())) return '-';
       
@@ -639,12 +801,12 @@
       
       const day = date.getDate();
       const month = thaiMonths[date.getMonth()];
-      const year = date.getFullYear() + 543;
+      const year = date.getFullYear() + 543; // แปลงเป็นพุทธศักราช
       
       return `${day} ${month} ${year}`;
     }
     
-    // Format date to Thai date (full)
+    // Format date to Thai date (full) - แสดงปีเป็นพุทธศักราช
     function formatThaiDateFull(date) {
       if (!date || isNaN(date.getTime())) return '-';
       
@@ -657,7 +819,7 @@
       const dayOfWeek = thaiDays[date.getDay()];
       const day = date.getDate();
       const month = thaiMonths[date.getMonth()];
-      const year = date.getFullYear() + 543;
+      const year = date.getFullYear() + 543; // แปลงเป็นพุทธศักราช
       
       return `${dayOfWeek} ที่ ${day} เดือน ${month} ปี พ.ศ. ${year}`;
     }
