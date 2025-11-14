@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: 'K2D', sans-serif;
@@ -49,10 +49,6 @@
     .btn-danger {
       background-color: #e01b24;
       border-color: #e01b24;
-    }
-    .btn-success {
-      background-color: #198754;
-      border-color: #198754;
     }
     .position-row {
       margin-bottom: 15px;
@@ -109,74 +105,6 @@
       font-size: 0.9em;
       color: #555;
     }
-    .thai-date-helper {
-      font-size: 0.9em;
-      color: #1a5fb4;
-      margin-top: 5px;
-    }
-
-    /* Print Styles */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printReport, #printReport * {
-        visibility: visible;
-      }
-      #printReport {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        font-size: 12pt;
-        color: #000;
-        background-color: #fff;
-      }
-      .report-title {
-        text-align: center;
-        font-size: 1.5em;
-        font-weight: bold;
-        margin-bottom: 20px;
-      }
-      .report-section {
-        margin-bottom: 20px;
-        border: 1px solid #ccc;
-        padding: 15px;
-        border-radius: 5px;
-        page-break-inside: avoid;
-      }
-      .report-section h4 {
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #333;
-        border-bottom: 1px solid #666;
-        padding-bottom: 5px;
-      }
-      .report-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .report-table td {
-        padding: 8px;
-        border: 1px solid #ddd;
-        font-size: 11pt;
-      }
-      .report-table td:first-child {
-        width: 30%;
-        font-weight: bold;
-        background-color: #f9f9f9;
-      }
-      .certification-box {
-        margin-top: 40px;
-        padding: 20px;
-        text-align: center;
-        page-break-inside: avoid;
-      }
-      .certification-box p {
-        margin-bottom: 40px;
-        font-size: 12pt;
-      }
-    }
   </style>
 </head>
 <body>
@@ -221,7 +149,6 @@
         <div class="col-md-4">
           <label for="startDate" class="form-label">วันเดือนปีบรรจุรับราชการ</label>
           <input type="date" class="form-control" id="startDate">
-          <div class="thai-date-helper" id="startDateDisplay">-</div>
         </div>
         <div class="col-md-4">
           <label for="retirementDate" class="form-label">วันเกษียณอายุราชการ</label>
@@ -233,7 +160,8 @@
     <div class="form-container">
       <h4 class="form-title"><i class="fas fa-history"></i> ประวัติการดำรงตำแหน่ง</h4>
       <div id="positionHistory">
-        </div>
+        <!-- Position rows will be added here -->
+      </div>
       <button type="button" class="btn btn-secondary mt-2" id="addPositionBtn">
         <i class="fas fa-plus"></i> เพิ่มตำแหน่ง
       </button>
@@ -256,6 +184,7 @@
         </div>
       </div>
       
+      <!-- คณะกรรมการพี่เลี้ยง (4 ครั้ง ครั้งละ 3 เดือน) -->
       <div class="committee-section">
         <div class="committee-title"><i class="fas fa-users"></i> คณะกรรมการพี่เลี้ยง (ให้คำแนะนำ 4 ครั้ง ครั้งละ 3 เดือน)</div>
         <div id="mentorCommitteeResults">
@@ -266,6 +195,7 @@
         </div>
       </div>
       
+      <!-- คณะกรรมการประเมิน (2 ครั้ง ครั้งละ 6 เดือน) -->
       <div class="committee-section">
         <div class="committee-title"><i class="fas fa-user-graduate"></i> คณะกรรมการประเมิน (ประเมิน 2 ครั้ง ครั้งละ 6 เดือน)</div>
         <div id="evaluationCommitteeResults">
@@ -279,12 +209,9 @@
       </div>
       <div id="progressText" class="text-center mb-3" style="display: none;">กำลังคำนวณ...</div>
       
-      <div class="d-flex justify-content-end gap-2 mt-4">
+      <div class="d-flex justify-content-between mt-4">
         <button type="button" class="btn btn-danger" onclick="clearForm()">
           <i class="fas fa-trash-alt"></i> ล้างข้อมูล
-        </button>
-        <button type="button" class="btn btn-success" onclick="generateReport()">
-          <i class="fas fa-print"></i> พิมพ์รายงาน
         </button>
         <button type="button" class="btn btn-primary" onclick="calculateAll()">
           <i class="fas fa-calculator"></i> คำนวณทั้งหมด
@@ -298,8 +225,6 @@
       <p>พัฒนาโดย จ่าสิบโท สุพจน์ ชัยชนะ </p>
     </div>
   </div>
-
-  <div id="printReport" style="display: none;"></div>
 
   <script>
     // วันหยุดราชการประจำปี (ตัวอย่าง)
@@ -337,17 +262,6 @@
       }
       return newDate;
     }
-
-    // Helper function to display พ.ศ. date
-    function updateThaiDateHelper(inputElement, displayId) {
-        const display = document.getElementById(displayId);
-        if (inputElement.value) {
-            const date = moment(inputElement.value).toDate();
-            display.innerHTML = `(${formatThaiDateFull(date)})`;
-        } else {
-            display.innerHTML = '-';
-        }
-    }
     
     // คำนวณอายุปัจจุบัน
     function calculateCurrentAge() {
@@ -363,13 +277,16 @@
       const birthMoment = moment(birthDate);
       const nowMoment = moment();
       
+      // แสดงวันเกิดแบบไทย
       document.getElementById('birthDateDisplay').innerHTML = 
         `<strong>วันเดือนปีเกิด:</strong> ${formatThaiDateFull(birthMoment.toDate())}`;
       
-      const duration = moment.duration(nowMoment.diff(birthMoment));
-      const years = duration.years();
-      const months = duration.months();
-      const days = duration.days();
+      // คำนวณอายุ
+      const years = nowMoment.diff(birthMoment, 'years');
+      birthMoment.add(years, 'years');
+      const months = nowMoment.diff(birthMoment, 'months');
+      birthMoment.add(months, 'months');
+      const days = nowMoment.diff(birthMoment, 'days');
       
       document.getElementById('currentAge').innerHTML = 
         `<strong>อายุปัจจุบัน:</strong> ${years} ปี ${months} เดือน ${days} วัน`;
@@ -384,29 +301,28 @@
               '<li>กรอกข้อมูลส่วนตัวและประวัติการดำรงตำแหน่ง</li>' +
               '<li>กดปุ่ม "คำนวณทั้งหมด" เพื่อดูผลลัพธ์</li>' +
               '<li>สามารถเพิ่มตำแหน่งได้โดยกดปุ่ม "เพิ่มตำแหน่ง"</li>' +
-              '<li>กดปุ่ม "พิมพ์รายงาน" เพื่อสร้างเอกสารสรุป</li>' +
               '<li>กดปุ่ม "ล้างข้อมูล" เพื่อเริ่มต้นใหม่</li>' +
               '</ol>' +
-              '<p><b>อัปเดต:</b> การคำนวณคณะกรรมการฯ (พี่เลี้ยง/ประเมิน) จะอิงจาก <b>"วันที่ดำรงตำแหน่ง"</b> ลำดับสุดท้าย</p></div>',
+              '<p>โปรแกรมนี้จะคำนวณวันที่ประเมินโดยไม่ตรงกับวันหยุดราชการ หากตรงจะขยับไปวันทำการถัดไป</p></div>',
         icon: 'info',
         confirmButtonText: 'เข้าใจแล้ว',
         width: '800px'
       });
       
+      // Add initial position row
       addPositionRow();
       
+      // Set up date change listeners
       document.getElementById('birthDate').addEventListener('change', function() {
         calculateRetirement();
         calculateCurrentAge();
       });
-
-      // === LOGIC CHANGE ===
-      // Removed calculateCommitteeDates() from here
       document.getElementById('startDate').addEventListener('change', function() {
+        calculateRetirement();
         calculateServiceAge();
-        updateThaiDateHelper(this, 'startDateDisplay');
       });
       
+      // Set up add position button
       document.getElementById('addPositionBtn').addEventListener('click', addPositionRow);
     });
     
@@ -431,7 +347,6 @@
           <div class="col-md-4">
             <label for="positionDate${rowCount}" class="form-label">วันที่ดำรงตำแหน่ง</label>
             <input type="date" class="form-control position-date" id="positionDate${rowCount}">
-            <div class="thai-date-helper" id="positionDateDisplay${rowCount}">-</div>
           </div>
           <div class="col-md-2 d-flex align-items-end">
             ${rowCount > 0 ? `<button type="button" class="btn btn-sm btn-danger" onclick="removePositionRow(this)"><i class="fas fa-trash"></i></button>` : ''}
@@ -446,19 +361,11 @@
       
       positionHistory.appendChild(newRow);
       
-      // === LOGIC CHANGE ===
-      // Added calculateCommitteeDates() here
+      // Add event listener for date change
       document.getElementById(`positionDate${rowCount}`).addEventListener('change', function() {
         calculatePositionDurations();
         calculateCurrentPositionDuration();
-        updateThaiDateHelper(this, `positionDateDisplay${rowCount}`);
-        calculateCommitteeDates(); // Recalculate based on this new date
       });
-
-      // Also recalculate if the *first* position is added/changed
-      if (rowCount === 0) {
-          document.getElementById(`positionDate0`).addEventListener('change', calculateCommitteeDates);
-      }
     }
     
     // Remove a position row
@@ -466,28 +373,24 @@
       const row = button.closest('.position-row');
       row.remove();
       
+      // Renumber remaining positions
       const positionHistory = document.getElementById('positionHistory');
       const rows = positionHistory.getElementsByClassName('position-row');
       
       for (let i = 0; i < rows.length; i++) {
         const labels = rows[i].getElementsByTagName('label');
         const inputs = rows[i].getElementsByTagName('input');
-        const helperDiv = rows[i].querySelector('.thai-date-helper');
         
         labels[0].textContent = `ตำแหน่งที่ ${i + 1}`;
         inputs[0].id = `positionTitle${i}`;
         inputs[1].id = `positionDate${i}`;
-        if (helperDiv) helperDiv.id = `positionDateDisplay${i}`;
       }
       
       calculatePositionDurations();
       calculateCurrentPositionDuration();
-      // === LOGIC CHANGE ===
-      // Added calculateCommitteeDates() here
-      calculateCommitteeDates(); // Recalculate based on the new last date
     }
     
-    // Calculate retirement date (Thai Civil Service Rule)
+    // Calculate retirement date (60 years from birth date)
     function calculateRetirement() {
       const birthDateInput = document.getElementById('birthDate');
       const birthDate = birthDateInput.value;
@@ -499,15 +402,7 @@
       
       try {
         const birthMoment = moment(birthDate, 'YYYY-MM-DD');
-        let retirementYear;
-        
-        if (birthMoment.month() >= 9) { // 9 = October
-          retirementYear = birthMoment.year() + 61;
-        } else {
-          retirementYear = birthMoment.year() + 60;
-        }
-        
-        const retirementMoment = moment({ year: retirementYear, month: 8, day: 30 }); // 8 = September
+        const retirementMoment = birthMoment.clone().add(60, 'years');
         
         document.getElementById('retirementDate').value = formatThaiDate(retirementMoment.toDate());
       } catch (e) {
@@ -527,14 +422,16 @@
       try {
         const startMoment = moment(startDate);
         const nowMoment = moment();
-        const duration = moment.duration(nowMoment.diff(startMoment));
-        const years = duration.years();
-        const months = duration.months();
-        const days = duration.days();
+        
+        const years = nowMoment.diff(startMoment, 'years');
+        startMoment.add(years, 'years');
+        const months = nowMoment.diff(startMoment, 'months');
+        startMoment.add(months, 'months');
+        const days = nowMoment.diff(startMoment, 'days');
         
         document.getElementById('serviceAgeResult').innerHTML = `
           <strong>${years} ปี ${months} เดือน ${days} วัน</strong><br>
-          <small>ตั้งแต่ ${formatThaiDate(startMoment.toDate())}</small> 
+          <small>ตั้งแต่ ${formatThaiDate(startMoment.toDate())}</small>
         `;
       } catch (e) {
         console.error('Error calculating service age:', e);
@@ -550,7 +447,8 @@
       if (!startDate) return;
       
       try {
-        let prevDateMoment = moment(startDate);
+        const startMoment = moment(startDate);
+        let prevDateMoment = startMoment;
         
         for (let i = 0; i < positionDates.length; i++) {
           const positionDate = positionDates[i].value;
@@ -570,7 +468,7 @@
           
           durationElement.innerHTML = `
             ระยะเวลา: <strong>${years} ปี ${months} เดือน ${days} วัน</strong>
-            ${i > 0 ? `<br><small>จากตำแหน่งก่อนหน้า: ${formatThaiDate(prevDateMoment.toDate())}</small>` : `<br><small>จากวันบรรจุ: ${formatThaiDate(prevDateMoment.toDate())}</small>`}
+            ${i > 0 ? `<br><small>จากตำแหน่งก่อนหน้า: ${formatThaiDate(prevDateMoment.toDate())}</small>` : ''}
           `;
           
           prevDateMoment = positionMoment;
@@ -588,8 +486,6 @@
         return;
       }
       
-      // === LOGIC CHANGE ===
-      // This function already correctly uses the last position date
       const lastPositionDate = positionDates[positionDates.length - 1].value;
       if (!lastPositionDate) {
         document.getElementById('currentPositionDuration').innerHTML = '-';
@@ -599,7 +495,9 @@
       try {
         const lastPositionMoment = moment(lastPositionDate);
         const nowMoment = moment();
+        
         const duration = moment.duration(nowMoment.diff(lastPositionMoment));
+        
         const years = duration.years();
         const months = duration.months();
         const days = duration.days();
@@ -614,42 +512,37 @@
       }
     }
     
-    // === FUNCTION FULLY UPDATED ===
-    // Calculate committee dates BASED ON LAST POSITION DATE
+    // Calculate committee dates
     function calculateCommitteeDates() {
-      const positionDates = document.getElementsByClassName('position-date');
-      let evaluationStartDate = null;
-
-      // Find the last date in the position history
-      if (positionDates.length > 0) {
-          evaluationStartDate = positionDates[positionDates.length - 1].value;
-      }
-      
-      // If no valid last position date, clear and exit
-      if (!evaluationStartDate) {
+      const startDate = document.getElementById('startDate').value;
+      if (!startDate) {
+        // Clear all committee dates
         for (let i = 1; i <= 4; i++) {
           document.getElementById(`mentor${i}`).innerHTML = '-';
+          document.getElementById(`mentor${i}`).classList.remove('holiday');
         }
         for (let i = 1; i <= 2; i++) {
           document.getElementById(`eval${i}`).innerHTML = '-';
+          document.getElementById(`eval${i}`).classList.remove('holiday');
         }
         return;
       }
       
       try {
-        // Use the last position date as the starting point
-        const startMoment = moment(evaluationStartDate);
+        const startMoment = moment(startDate);
         
         // คณะกรรมการพี่เลี้ยง (4 ครั้ง ครั้งละ 3 เดือน)
         for (let i = 1; i <= 4; i++) {
           const mentorDate = getNextWorkDay(startMoment.clone().add(i * 3, 'months').toDate());
           document.getElementById(`mentor${i}`).innerHTML = formatThaiDateFull(mentorDate);
+          document.getElementById(`mentor${i}`).classList.remove('holiday');
         }
         
         // คณะกรรมการประเมิน (2 ครั้ง ครั้งละ 6 เดือน)
         for (let i = 1; i <= 2; i++) {
           const evalDate = getNextWorkDay(startMoment.clone().add(i * 6, 'months').toDate());
           document.getElementById(`eval${i}`).innerHTML = formatThaiDateFull(evalDate);
+          document.getElementById(`eval${i}`).classList.remove('holiday');
         }
       } catch (e) {
         console.error('Error calculating committee dates:', e);
@@ -658,11 +551,13 @@
     
     // Calculate all
     function calculateAll() {
+      // Show progress bar
       const progressBar = document.getElementById('progressBar');
       const progressText = document.getElementById('progressText');
       progressBar.style.display = 'block';
       progressText.style.display = 'block';
       
+      // Animate progress bar
       let progress = 0;
       const interval = setInterval(() => {
         progress += 10;
@@ -673,13 +568,13 @@
           progressBar.style.display = 'none';
           progressText.style.display = 'none';
           
-          // All functions will now run in the correct order
+          // Perform calculations
           calculateRetirement();
           calculateCurrentAge();
           calculateServiceAge();
           calculatePositionDurations();
           calculateCurrentPositionDuration();
-          calculateCommitteeDates(); // This will now use the last position date
+          calculateCommitteeDates();
           
           Swal.fire('สำเร็จ', 'การคำนวณเสร็จสมบูรณ์', 'success');
         }
@@ -699,6 +594,7 @@
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
+          // Clear all inputs
           document.getElementById('fullName').value = '';
           document.getElementById('position').value = '';
           document.getElementById('academicRank').value = '';
@@ -707,139 +603,29 @@
           document.getElementById('startDate').value = '';
           document.getElementById('retirementDate').value = '';
           
+          // Clear position history
           document.getElementById('positionHistory').innerHTML = '';
           addPositionRow();
           
+          // Clear results
           document.getElementById('serviceAgeResult').innerHTML = '-';
           document.getElementById('currentPositionDuration').innerHTML = '-';
           document.getElementById('birthDateDisplay').textContent = '-';
           document.getElementById('currentAge').textContent = '-';
-          document.getElementById('startDateDisplay').textContent = '-';
           
-          // Clear committee results (will be cleared by addPositionRow indirectly, but good to be explicit)
-          calculateCommitteeDates(); 
+          // Clear committee results
+          for (let i = 1; i <= 4; i++) {
+            document.getElementById(`mentor${i}`).innerHTML = '-';
+            document.getElementById(`mentor${i}`).classList.remove('holiday');
+          }
+          for (let i = 1; i <= 2; i++) {
+            document.getElementById(`eval${i}`).innerHTML = '-';
+            document.getElementById(`eval${i}`).classList.remove('holiday');
+          }
           
           Swal.fire('ล้างข้อมูลแล้ว', 'ข้อมูลทั้งหมดถูกล้างเรียบร้อย', 'success');
         }
       });
-    }
-
-    // Generate printable report
-    function generateReport() {
-        const fullName = document.getElementById('fullName').value || 'N/A';
-        const position = document.getElementById('position').value || 'N/A';
-        const academicRank = document.getElementById('academicRank').value || 'N/A';
-        const school = document.getElementById('school').value || 'N/A';
-        
-        const birthDate = document.getElementById('birthDate').value;
-        const birthDateDisplay = birthDate ? formatThaiDateFull(moment(birthDate).toDate()) : '-';
-        const currentAge = document.getElementById('currentAge').innerHTML.replace('<strong>อายุปัจจุบัน:</strong> ', '') || '-';
-        
-        const startDate = document.getElementById('startDate').value;
-        
-        if (!startDate || !birthDate) {
-             Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอก "วันเดือนปีเกิด" และ "วันเดือนปีบรรจุรับราชการ" ก่อนพิมพ์รายงาน', 'warning');
-             return;
-        }
-
-        // Check if last position date is entered, as committee dates depend on it
-        const positionDates = document.getElementsByClassName('position-date');
-        if (positionDates.length === 0 || !positionDates[positionDates.length - 1].value) {
-            Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอก "วันที่ดำรงตำแหน่ง" อย่างน้อย 1 รายการก่อนพิมพ์รายงาน', 'warning');
-             return;
-        }
-
-        const startDateDisplay = formatThaiDateFull(moment(startDate).toDate());
-        const retirementDate = document.getElementById('retirementDate').value || '-';
-        const serviceAge = document.getElementById('serviceAgeResult').innerText.replace(/\n/g, ' ') || '-';
-        
-        let positionHtml = '<table class="report-table"><tr><td style="width: 10%;">ลำดับ</td><td style="width: 50%;">ตำแหน่ง</td><td style="width: 40%;">วันที่ดำรงตำแหน่ง</td></tr>';
-        const positionRows = document.getElementById('positionHistory').children;
-        if (positionRows.length > 0 && document.getElementById('positionDate0').value) {
-            for (let i = 0; i < positionRows.length; i++) {
-                const title = document.getElementById(`positionTitle${i}`).value || 'N/A';
-                const dateVal = document.getElementById(`positionDate${i}`).value;
-                const date = dateVal ? formatThaiDateFull(moment(dateVal).toDate()) : '-';
-                positionHtml += `<tr><td>${i + 1}</td><td>${title}</td><td>${date}</td></tr>`;
-            }
-        } else {
-            positionHtml += '<tr><td colspan="3" style="text-align: center;">ไม่มีข้อมูล</td></tr>';
-        }
-        positionHtml += '</table>';
-        
-        const mentor1 = document.getElementById('mentor1').innerText || '-';
-        const mentor2 = document.getElementById('mentor2').innerText || '-';
-        const mentor3 = document.getElementById('mentor3').innerText || '-';
-        const mentor4 = document.getElementById('mentor4').innerText || '-';
-        
-        const eval1 = document.getElementById('eval1').innerText || '-';
-        const eval2 = document.getElementById('eval2').innerText || '-';
-        const reportDate = formatThaiDateFull(new Date());
-
-        const reportContent = `
-            <div style="padding: 20px;">
-                <div class="report-title">
-                    <img src="https://raw.githubusercontent.com/suphot1973/Data/refs/heads/main/images/sesapylogo.png" alt="Logo" style="width: 100px; margin-bottom: 10px;"><br>
-                    รายงานการคำนวณระยะเวลาการประเมินข้าราชการ
-                </div>
-                <p style="text-align: right; font-size: 11pt;"><strong>พิมพ์ ณ วันที่:</strong> ${reportDate}</p>
-                <div class="report-section">
-                    <h4><i class="fas fa-user-tie"></i> ข้อมูลส่วนตัว</h4>
-                    <table class="report-table">
-                        <tr><td>ชื่อ-สกุล</td><td>${fullName}</td></tr>
-                        <tr><td>ตำแหน่ง</td><td>${position}</td></tr>
-                        <tr><td>วิทยฐานะ</td><td>${academicRank}</td></tr>
-                        <tr><td>โรงเรียน</td><td>${school}</td></tr>
-                    </table>
-                </div>
-                <div class="report-section">
-                    <h4><i class="fas fa-calendar-alt"></i> ข้อมูลวันสำคัญ</h4>
-                    <table class="report-table">
-                        <tr><td>วันเดือนปีเกิด</td><td>${birthDateDisplay}</td></tr>
-                        <tr><td>อายุปัจจุบัน</td><td>${currentAge}</td></tr>
-                        <tr><td>วันบรรจุรับราชการ</td><td>${startDateDisplay}</td></tr>
-                        <tr><td>วันเกษียณอายุราชการ</td><td>${retirementDate}</td></tr>
-                        <tr><td>อายุราชการ (ณ ปัจจุบัน)</td><td>${serviceAge}</td></tr>
-                    </table>
-                </div>
-                <div class="report-section">
-                    <h4><i class="fas fa-history"></i> ประวัติการดำรงตำแหน่ง</h4>
-                    ${positionHtml}
-                </div>
-                <div class="report-section">
-                    <h4><i class="fas fa-users"></i> กำหนดการประเมิน (นับจากตำแหน่งล่าสุด)</h4>
-                    <table class="report-table">
-                        <tr><td colspan="2" style="background-color: #eee; text-align: center;"><strong>คณะกรรมการพี่เลี้ยง (4 ครั้ง)</strong></td></tr>
-                        <tr><td>ครั้งที่ 1 (ครบ 3 เดือน)</td><td>${mentor1}</td></tr>
-                        <tr><td>ครั้งที่ 2 (ครบ 6 เดือน)</td><td>${mentor2}</td></tr>
-                        <tr><td>ครั้งที่ 3 (ครบ 9 เดือน)</td><td>${mentor3}</td></tr>
-                        <tr><td>ครั้งที่ 4 (ครบ 12 เดือน)</td><td>${mentor4}</td></tr>
-                        <tr><td colspan="2" style="background-color: #eee; text-align: center;"><strong>คณะกรรมการประเมิน (2 ครั้ง)</strong></td></tr>
-                        <tr><td>ครั้งที่ 1 (ครบ 6 เดือน)</td><td>${eval1}</td></tr>
-                        <tr><td>ครั้งที่ 2 (ครบ 12 เดือน)</td><td>${eval2}</td></tr>
-                    </table>
-                </div>
-                <div class="certification-box">
-                    <p>ขอรับรองว่าข้อมูลข้างต้นเป็นความจริงทุกประการ</p>
-                    <p style="text-align: center; margin-top: 80px;">
-                        (.............................................)<br>
-                        ${fullName}<br>
-                        ตำแหน่ง ${position}
-                    </p>
-                    <p style="text-align: center; margin-top: 80px;">
-                        <strong>ผู้รับรองข้อมูล / เจ้าหน้าที่</strong><br>
-                        (.............................................)<br>
-                        ตำแหน่ง .............................................
-                    </p>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('printReport').innerHTML = reportContent;
-        
-        setTimeout(function() {
-            window.print();
-        }, 100);
     }
     
     // Format date to Thai date (short)
@@ -873,7 +659,7 @@
       const month = thaiMonths[date.getMonth()];
       const year = date.getFullYear() + 543;
       
-      return `${dayOfWeek} ที่ ${day} เดือน ${month} พ.ศ. ${year}`;
+      return `${dayOfWeek} ที่ ${day} เดือน ${month} ปี พ.ศ. ${year}`;
     }
   </script>
 </body>
