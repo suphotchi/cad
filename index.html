@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -367,8 +368,10 @@
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
         title: 'ยินดีต้อนรับ',
+        // === THE FIX IS HERE ===
+        // Removed the stray '_' that was before the '+'
         html: '<div style="text-align: left;"><p><b>คำแนะนำในการใช้โปรแกรม:</b></p>' +
-              '<ol>'_ +
+              '<ol>' + 
               '<li>กรอกข้อมูลส่วนตัวและประวัติการดำรงตำแหน่ง</li>' +
               '<li>กดปุ่ม "คำนวณทั้งหมด" เพื่อดูผลลัพธ์</li>' +
               '<li>สามารถเพิ่มตำแหน่งได้โดยกดปุ่ม "เพิ่มตำแหน่ง"</li>' +
@@ -450,7 +453,6 @@
     
     function removePositionRow(button) {
       const row = button.closest('.position-row');
-      // Before removing, destroy the flatpickr instance to prevent memory leaks
       const dateInput = row.querySelector('.position-date');
       if (dateInput && dateInput._flatpickr) {
           dateInput._flatpickr.destroy();
@@ -462,7 +464,7 @@
       
       for (let i = 0; i < rows.length; i++) {
         const labels = rows[i].getElementsByTagName('label');
-        const titleInput = rows[i].querySelector('input[type="text"]'); // Assumes first text input is title
+        const titleInput = rows[i].querySelector('input[type="text"]');
         const dateInput = rows[i].querySelector('.position-date');
         
         labels[0].textContent = `ตำแหน่งที่ ${i + 1}`;
@@ -476,7 +478,6 @@
     }
     
     // --- All calculation functions below this line are UNCHANGED ---
-    // They work perfectly with the "Y-m-d" value from flatpickr
     
     function calculateRetirement() {
       const birthDateInput = document.getElementById('birthDate');
@@ -688,9 +689,7 @@
             document.getElementById('startDate')._flatpickr.clear();
           }
           
-          // Clear and recreate position history
           const positionHistory = document.getElementById('positionHistory');
-          // Destroy all datepickers inside
           positionHistory.querySelectorAll('.position-date').forEach(input => {
               if (input._flatpickr) {
                   input._flatpickr.destroy();
